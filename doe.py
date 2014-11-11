@@ -6,15 +6,15 @@ import sys
 
 
 def get_volumes(conn):
-	orphaned = []
-	if not conn:
-		return [], 0
-	volumes = conn.get_all_volumes()
-	for vol in volumes:
-		if vol.status == "available" and vol.tags == {} :
-			orphaned.append(vol)
+    orphaned = []
+    if not conn:
+        return [], 0
+    volumes = conn.get_all_volumes()
+    for vol in volumes:
+        if vol.status == "available" and vol.tags == {} :
+            orphaned.append(vol)
 
-	return orphaned, len(volumes)
+    return orphaned, len(volumes)
 
 
 parser = OptionParser()
@@ -32,20 +32,23 @@ total_orphaned = []
 total_vols = 0
 
 for zone in zones:
-	print "\nZone:", zone
-	conn = boto.ec2.connect_to_region(zone)
-	(zone_orphaned, zone_total_vols) = get_volumes(conn)
-	print "Total:", zone_total_vols, "Orphaned:", len(zone_orphaned)
-	total_orphaned += zone_orphaned
-	total_vols += zone_total_vols
+    print "\nZone:", zone
+    conn = boto.ec2.connect_to_region(zone)
+    (zone_orphaned, zone_total_vols) = get_volumes(conn)
+    print "Total:", zone_total_vols, "Orphaned:", len(zone_orphaned)
+    total_orphaned += zone_orphaned
+    total_vols += zone_total_vols
 
 
 for vol in total_orphaned:
-	if options.delete:
-		print "Deleting EBS orphan", vol.id
-		vol.delete()
-	orphaned_space_total += vol.size
+    orphaned_space_total += vol.size
 
 print "\n\nTotal Volumes:", total_vols
 print "Total Orphaned:", len(total_orphaned)
 print "Orphaned Space:", orphaned_space_total, " GB"
+
+if options.delete:
+    print "\n"
+    for vol in total_orphaned:
+        print "Deleting EBS orphan", vol.id, vol.region
+        vol.delete()
