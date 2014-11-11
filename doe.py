@@ -42,6 +42,7 @@ for zone in zones:
 
 for vol in total_orphaned:
 	if options.delete:
+		print "Deleting EBS orphan", vol.id
 		vol.delete()
 	orphaned_space_total += vol.size
 
